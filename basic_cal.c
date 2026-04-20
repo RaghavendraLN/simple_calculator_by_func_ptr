@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-//RaghavendraLN
+
 #define MAX_OPERATIONS 4
+
 float sum_func(float a, float b)
 {
 	return (a+b);
