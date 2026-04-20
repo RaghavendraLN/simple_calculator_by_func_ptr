@@ -9,7 +9,7 @@
  * substaction and divisions of floats.
  */
 
-#define MAX_OPERATIONS 4
+#define MAX_OPERATIONS 5
 float sum_func(float a, float b)
 {
 	return (a+b);
@@ -29,6 +29,12 @@ float div_func(float a, float b)
 {
 	return (a/b);
 }
+
+float modulo_func(float a, float b)
+{
+	return ((int)a % (int)b);
+}
+
 char calci_info_helper(char *arg_a, char *arg_b, float *val_a, float *val_b)
 {
 	char key;
@@ -38,6 +44,7 @@ char calci_info_helper(char *arg_a, char *arg_b, float *val_a, float *val_b)
 	puts("----------- | -----");
 	puts("	SUM : ' + ' ");puts("	SUB : ' - ' ");
 	puts("	MUL : ' * ' ");puts("	DIV : ' / ' ");
+	puts("     MODULO : ' % ' ");
 	puts("----------- | -----");
 
 	puts("Enter Your Operation 'Key'");
@@ -49,7 +56,8 @@ char calci_info_helper(char *arg_a, char *arg_b, float *val_a, float *val_b)
 }
 
 typedef float (*calci_func_ptr)(float, float);
-void calci_operation_execute_cb( char key, calci_func_ptr cb_fn, float a, float b)
+
+void calci_operation_execute_cb(char key, const char *operation, calci_func_ptr cb_fn, float a, float b)
 {
 	float result;
 	int found = -1, i;
@@ -59,42 +67,38 @@ void calci_operation_execute_cb( char key, calci_func_ptr cb_fn, float a, float 
 		return; 
 	}
 	result = cb_fn(a, b);
-	printf("The result of (%.2f) %c (%.2f) = %.3f\n", a, key, b, result);
+	printf("The %s of (%.2f) %c (%.2f) = %.3f\n",operation, a, key, b, result);
 	
 }
+typedef struct {
+	char key;
+	const char *name;
+	calci_func_ptr cb_fn;
+}operation ;
 
 int main(int argc, char **argv)
 {
-	float a = 15, b = 5; //default values
-	float result;
-	char operation;
-	char keys[] = {'+', '-', '*', '/'};
-	int found = -1;
-	calci_func_ptr calci_func_array[MAX_OPERATIONS] = {sum_func, sub_func, mult_func, div_func};
-	calci_func_ptr chosen_calci_func;
+	float a, b; 
+	char chosen_key;
+	operation ops[MAX_OPERATIONS] = {
+		{'+', "sum", sum_func},	
+		{'-', "sub", sub_func},	
+		{'*', "mul", mult_func},
+		{'/', "div", div_func},	
+		{'%', "modulo", modulo_func}	
+	};
 
 	puts("$$welcome to Basic Calulator$$");
 	if(argc != 3) {
 		printf("Invalid arguments\nUsage: ./app a b\n");
 		return -1;
 	}
-	operation = calci_info_helper(argv[1], argv[2], &a, &b);
-	switch(operation) {
-		case '+':
-			chosen_calci_func = calci_func_array[0];
-			break;
-		case '-':
-			chosen_calci_func = calci_func_array[1];
-			break;
-		case '*':
-			chosen_calci_func = calci_func_array[2];
-			break;
-		case '/':
-			chosen_calci_func = calci_func_array[3];
-			break;
-		default:
-			printf(" Invalid operatior: ' %c '\n",operation);
-			break;
+
+	chosen_key = calci_info_helper(argv[1], argv[2], &a, &b);
+	for( char i = 0; i < MAX_OPERATIONS; i++) {
+		if(chosen_key == ops[i].key) {
+			calci_operation_execute_cb(ops[i].key, ops[i].name, ops[i].cb_fn, a, b);
+		}
 	}
-	calci_operation_execute_cb(operation, chosen_calci_func, a, b);
+	
 }
